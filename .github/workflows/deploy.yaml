@@ -1,0 +1,100 @@
+name: Build and Update GitOps
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Spring Boot 소스코드 다운로드
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      # 2. Java 설치
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      # 3. Spring Boot JAR 빌드
+      - name: Build Spring Boot
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean bootJar
+
+      # 4. GHCR 로그인
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 5. 컨테이너 이미지 빌드 및 Push
+      - name: Build and Push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/woonkim0413/self-introduction:${{ github.sha }}
+
+      # 6. GitOps 저장소 Checkout
+      - name: Checkout GitOps
+        uses: actions/checkout@v4
+        with:
+          repository: woonkim0413/homeServer-gitOps
+          token: ${{ secrets.GITOPS_TOKEN }}
+          ref: main
+          path: gitops
+
+      # 7. Deployment 이미지 태그 업데이트
+      - name: Update image tag
+        env:
+          IMAGE: ghcr.io/woonkim0413/self-introduction:${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          path = Path("gitops/apps/self-Intruduction/deployment.yaml")
+          text = path.read_text()
+
+          lines = text.splitlines()
+          for i, line in enumerate(lines):
+              if line.strip().startswith("image: "):
+                  lines[i] = (
+                      line[:len(line) - len(line.lstrip())]
+                      + "image: " + os.environ["IMAGE"]
+                  )
+                  break
+          else:
+              raise RuntimeError("image field not found")
+
+          path.write_text("\n".join(lines) + "\n")
+          PY
+
+      # 8. GitOps 저장소에 변경사항 Push
+      - name: Commit and Push GitOps
+        working-directory: gitops
+        run: |
+          git config user.name "github-actions"
+          git config user.email \
+            "github-actions@users.noreply.github.com"
+
+          git add apps/self-Intruduction/deployment.yaml
+
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "deploy: ${{ github.sha }}"
+            git push origin main
+          fi
