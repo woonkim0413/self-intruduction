@@ -45,13 +45,21 @@ jobs:
         with:
           context: .
           push: true
+<<<<<<< HEAD
           tags: ghcr.io/woonkim0413/self-introduction:${{ github.sha }}
+=======
+          tags: ghcr.io/woonkim0413/self-intruduction:${{ github.sha }}
+>>>>>>> 3cc24f5 (cicd gitOps 저장소 url 수정)
 
       # 6. GitOps 저장소 Checkout
       - name: Checkout GitOps
         uses: actions/checkout@v4
         with:
+<<<<<<< HEAD
           repository: woonkim0413/homeServer-gitOps
+=======
+          repository: woonkim0413/homeServer-gitops
+>>>>>>> 3cc24f5 (cicd gitOps 저장소 url 수정)
           token: ${{ secrets.GITOPS_TOKEN }}
           ref: main
           path: gitops
@@ -59,13 +67,21 @@ jobs:
       # 7. Deployment 이미지 태그 업데이트
       - name: Update image tag
         env:
+<<<<<<< HEAD
           IMAGE: ghcr.io/woonkim0413/self-introduction:${{ github.sha }}
+=======
+          IMAGE: ghcr.io/woonkim0413/self-intruduction:${{ github.sha }}
+>>>>>>> 3cc24f5 (cicd gitOps 저장소 url 수정)
         run: |
           python3 - <<'PY'
           import os
           from pathlib import Path
 
+<<<<<<< HEAD
           path = Path("gitops/apps/self-Intruduction/deployment.yaml")
+=======
+          path = Path("gitops/apps/self-intruduction/deployment.yaml")
+>>>>>>> 3cc24f5 (cicd gitOps 저장소 url 수정)
           text = path.read_text()
 
           lines = text.splitlines()
@@ -90,11 +106,21 @@ jobs:
           git config user.email \
             "github-actions@users.noreply.github.com"
 
+<<<<<<< HEAD
           git add apps/self-Intruduction/deployment.yaml
+=======
+          git add apps/self-intruduction/deployment.yaml
+>>>>>>> 3cc24f5 (cicd gitOps 저장소 url 수정)
 
           if git diff --cached --quiet; then
             echo "No changes"
           else
+<<<<<<< HEAD
             git commit -m "deploy: ${{ github.sha }}"
             git push origin main
           fi
+=======
+            git commit -m "chore(deploy): update self-intruduction to ${GITHUB_SHA::8}"
+            git push origin main
+          fi
+>>>>>>> 3cc24f5 (cicd gitOps 저장소 url 수정)
