@@ -59,7 +59,7 @@ jobs:
       # 7. Deployment 이미지 태그 업데이트
       - name: Update image tag
         env:
-          IMAGE: ghcr.io/woonkim0413/self-intruduction:${{ github.sha }}
+          IMAGE: ghcr.io/woonkim0413/self-introduction:${{ github.sha }}
         run: |
           python3 - <<'PY'
           import os
