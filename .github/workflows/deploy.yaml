@@ -25,11 +25,11 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      # 3. Spring Boot JAR 빌드
+      # 3. JSP를 포함하는 실행형 Spring Boot WAR 빌드
       - name: Build Spring Boot
         run: |
           chmod +x ./gradlew
-          ./gradlew clean bootJar
+          ./gradlew clean bootWar
 
       # 4. GHCR 로그인
       - name: Login to GHCR
@@ -65,7 +65,7 @@ jobs:
           import os
           from pathlib import Path
 
-          path = Path("gitops/apps/self-intruduction/deployment.yaml")
+          path = Path("gitops/apps/self-Intruduction/deployment.yaml")
           text = path.read_text()
 
           lines = text.splitlines()
@@ -90,7 +90,7 @@ jobs:
           git config user.email \
             "github-actions@users.noreply.github.com"
 
-          git add apps/self-intruduction/deployment.yaml
+          git add apps/self-Intruduction/deployment.yaml
 
           if git diff --cached --quiet; then
             echo "No changes"

@@ -6,11 +6,11 @@ WORKDIR /app
 RUN groupadd --system spring \
     && useradd --system --gid spring --home-dir /app --shell /usr/sbin/nologin spring
 
-# The GitHub Actions workflow builds the executable JAR before building this image.
-COPY --chown=spring:spring build/libs/*.jar /app/app.jar
+# The GitHub Actions workflow builds an executable WAR so JSP views are included.
+COPY --chown=spring:spring build/libs/*.war /app/app.war
 
 USER spring:spring
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "/app/app.war"]
